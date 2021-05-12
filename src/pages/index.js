@@ -82,11 +82,11 @@ export default function Home({ posts: defaultPosts }) {
 
 export async function getStaticProps() {
   // returning promise needs await
-  const posts = await getAllPosts();
+  // const posts = await getAllPosts();
 
   return {
     props: {
-      posts,
+      posts: [],
     },
   };
 }

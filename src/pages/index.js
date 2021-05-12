@@ -1,10 +1,35 @@
+import { useState, useEffect } from "react";
 import Head from "next/head";
+
+import { useAuth } from "../hooks/useAuth";
+import { getAllPosts, createPost } from "../lib/posts";
+
 import Bio from "../components/Bio";
 import Post from "../components/Post";
 import PostForm from "../components/PostForm";
 import styles from "../styles/Home.module.scss";
 
-export default function Home() {
+export default function Home({ posts: defaultPosts }) {
+  const [posts, updatePosts] = useState(defaultPosts);
+  const postsSorted = posts.sort(function (a, b) {
+    // turn srtings into dates, then subtract them
+    // to get a value that is either negative, positive, or zero
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  const { user, logIn, logOut } = useAuth();
+
+  async function handleOnSubmit(data, e) {
+    e.preventDefault();
+
+    await createPost(data);
+
+    const posts = await getAllPosts();
+    updatePosts(posts);
+  }
+
+  // console.log("posts", posts);
+  // console.log("user", user);
   return (
     <div className={styles.container}>
       <Head>
@@ -13,39 +38,55 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      {!user && (
+        <p>
+          <button onClick={logIn}>Login</button>
+        </p>
+      )}
+
+      {user && (
+        <p>
+          <button onClick={logOut}>Logout</button>
+        </p>
+      )}
+
       <main className={styles.main}>
         <Bio
-          headshot="https://pbs.twimg.com/profile_images/968620685395308544/tCKxhH3N_400x400.jpg"
+          headshot="https://pbs.twimg.com/profile_images/1390762297040146435/pj7DArds_400x400.jpg"
           name="Frankie Valentine"
           tagline="Building the next-gen of the web"
           role="Founder @ V3 Digital Studio"
         />
         <ul className={styles.posts}>
-          <li>
-            <Post
-              content="I’m working in Figma to design a website to display all of my
-              Tweets"
-              date="4/28/2021"
-            />
-          </li>
-          <li>
-            <Post
-              content="I’m working in Figma to design a website to display all of my
-              Tweets"
-              date="4/28/2021"
-            />
-          </li>
-          <li>
-            <Post
-              content="I’m working in Figma to design a website to display all of my
-              Tweets"
-              date="4/28/2021"
-            />
-          </li>
+          {postsSorted.map((post) => {
+            const { content, id, date } = post;
+            return (
+              <li key={id}>
+                <Post
+                  content={content}
+                  date={new Intl.DateTimeFormat("en-US", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                  }).format(new Date(date))}
+                />
+              </li>
+            );
+          })}
         </ul>
 
-        <PostForm />
+        {user && <PostForm onSubmit={handleOnSubmit} />}
       </main>
     </div>
   );
+}
+
+export async function getStaticProps() {
+  // returning promise needs await
+  const posts = await getAllPosts();
+
+  return {
+    props: {
+      posts,
+    },
+  };
 }

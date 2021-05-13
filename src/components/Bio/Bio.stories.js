@@ -9,7 +9,7 @@ export default {
 
 const Template = () => (
   <Bio
-    headshot="https://pbs.twimg.com/profile_images/968620685395308544/tCKxhH3N_400x400.jpg"
+    headshot="https://pbs.twimg.com/profile_images/1390762297040146435/pj7DArds_400x400.jpg"
     name="Frankie Valentine"
     tagline="Building the next-gen of the web"
     role="Founder @ V3 Digital Studio"
